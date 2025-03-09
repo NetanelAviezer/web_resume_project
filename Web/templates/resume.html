@@ -1,93 +1,320 @@
-<!-- Modern Resume Template -->
-<div class="resume-container">
-    <div class="resume-header">
-      <h1 class="resume-name">Nehoray Hillel</h1>
-      <h2 class="resume-title">IT Professional</h2>
-      
-      <div class="contact-info">
-        <div class="contact-item">
-          <i class="fas fa-envelope"></i>
-          <a href="mailto:Nhoray5@gmail.com">Nhoray5@gmail.com</a>
+<!DOCTYPE html>
+<html lang="he-IL">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Netanel Aviezer - Senior System Administrator</title>
+    <style>
+        /* Global Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .resume-container {
+            max-width: 900px;
+            margin: 30px auto;
+            background-color: white;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            border-radius: 6px;
+        }
+        
+        /* Header Styles */
+        .resume-header {
+            margin-bottom: 30px;
+            border-bottom: 2px solid #2c3e50;
+            padding-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .resume-name {
+            font-size: 36px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        
+        .resume-title {
+            font-size: 22px;
+            font-weight: 500;
+            color: #34495e;
+            margin-bottom: 20px;
+        }
+        
+        .contact-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .contact-item a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        
+        .contact-item a:hover {
+            text-decoration: underline;
+        }
+        
+        /* Summary */
+        .resume-summary {
+            margin-bottom: 30px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-left: 4px solid #2c3e50;
+            font-size: 15px;
+        }
+        
+        /* Section Styles */
+        .resume-section {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+        }
+        
+        .section-title {
+            font-size: 22px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        /* Skills */
+        .skill-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .skill-item {
+            background-color: #3498db;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .skill-detail-list {
+            list-style-position: inside;
+            margin-left: 15px;
+            margin-top: 10px;
+        }
+        
+        .skill-detail-list li {
+            margin-bottom: 8px;
+            font-size: 15px;
+        }
+        
+        /* Experience */
+        .experience-item {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px dashed #e0e0e0;
+        }
+        
+        .experience-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #34495e;
+            margin-bottom: 5px;
+        }
+        
+        .experience-company {
+            font-weight: 500;
+            color: #3498db;
+            margin-bottom: 5px;
+        }
+        
+        .experience-date {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-bottom: 8px;
+        }
+        
+        /* Education */
+        .education-item {
+            margin-bottom: 15px;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .resume-container {
+                padding: 20px;
+                margin: 15px;
+            }
+            
+            .contact-info {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .resume-name {
+                font-size: 28px;
+            }
+            
+            .resume-title {
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="resume-container">
+        <div class="resume-header">
+            <h1 class="resume-name">Netanel Aviezer</h1>
+            <h2 class="resume-title">Senior System Administrator</h2>
+            
+            <div class="contact-info">
+                <div class="contact-item">
+                    <i class="fas fa-envelope"></i>
+                    <a href="mailto:netanelaviezer@gmail.com">netanelaviezer@gmail.com</a>
+                </div>
+                <div class="contact-item">
+                    <i class="fas fa-phone"></i>
+                    <span>050-6981240</span>
+                </div>
+                <div class="contact-item">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>Tel Aviv - Yafo</span>
+                </div>
+                <div class="contact-item">
+                    <i class="fas fa-calendar"></i>
+                    <span>Date of Birth: 15.10.99</span>
+                </div>
+            </div>
         </div>
-        <div class="contact-item">
-          <i class="fas fa-phone"></i>
-          <span>+972524322618</span>
+        
+        <div class="resume-summary">
+            <p>Experienced IT professional with proven expertise in server and network communication. Skilled in installation, maintenance, and upgrading of various vendor components. Looking for advancement opportunities in the DevOps field.</p>
         </div>
-      </div>
+        
+        <div class="resume-section">
+            <h3 class="section-title">Skills</h3>
+            <div class="skill-list">
+                <span class="skill-item">Strong Work Ethic</span>
+                <span class="skill-item">Excellent People Skills</span>
+                <span class="skill-item">Responsibility</span>
+                <span class="skill-item">Problem Solving</span>
+                <span class="skill-item">Process Optimization</span>
+                <span class="skill-item">Teamwork</span>
+            </div>
+        </div>
+        
+        <div class="resume-section">
+            <h3 class="section-title">Technology Expertise</h3>
+            <div class="skill-list">
+                <span class="skill-item">Active Directory</span>
+                <span class="skill-item">Network Infrastructure</span>
+                <span class="skill-item">Virtualization</span>
+                <span class="skill-item">Office 365</span>
+                <span class="skill-item">VPN (Fortigate)</span>
+                <span class="skill-item">Backup Systems</span>
+                <span class="skill-item">LAN & WAN</span>
+                <span class="skill-item">VMware & Hyper-V</span>
+            </div>
+        </div>
+        
+        <div class="resume-section">
+            <h3 class="section-title">Experience</h3>
+            
+            <div class="experience-item">
+                <h4 class="experience-title">Senior System Administrator & Network</h4>
+                <p class="experience-company">Malam Team</p>
+                <p class="experience-date">2023-2024</p>
+                <p>Installation, upgrading, and maintenance of communication components and physical and virtual servers for a regular client with a large and diverse environment.</p>
+                <ul class="skill-detail-list">
+                    <li>Network - Support for communication issues at different company locations.</li>
+                    <li>Troubleshooting in Wi-Fi, LAN, WAN & Servers environments.</li>
+                    <li>Virtualization - Working in VMware & Hyper-V environments.</li>
+                    <li>Backup systems - Such as DataBank & Spectrum.</li>
+                </ul>
+            </div>
+            
+            <div class="experience-item">
+                <h4 class="experience-title">System Administrator & Network</h4>
+                <p class="experience-company">mPrest</p>
+                <p class="experience-date">2021-2022</p>
+                <p>Installation, upgrading, and maintenance of communication components and physical and virtual servers for company employees and its customers. Provided support for company employees at various levels.</p>
+                <ul class="skill-detail-list">
+                    <li>Active Directory management.</li>
+                    <li>VPN (Fortigate) implementation and support.</li>
+                    <li>Office 365 - Implementation, maintenance, and user support.</li>
+                    <li>Antivirus - Micro Trend implementation and management.</li>
+                    <li>Troubleshooting - Computers, servers, and network components.</li>
+                </ul>
+            </div>
+            
+            <div class="experience-item">
+                <h4 class="experience-title">Communications Technician</h4>
+                <p class="experience-company">IDF, Intelligence Corps</p>
+                <p class="experience-date">2018-2020</p>
+                <p>Development and maintenance of communication systems and implementation of various communication protocols to ensure efficient communication between different units.</p>
+                <ul class="skill-detail-list">
+                    <li>LAN & WAN infrastructure management.</li>
+                    <li>Switches & Router configuration and maintenance.</li>
+                    <li>Protocol expertise: IPSEC, ACL, SSH, NAT, GRE TUNNEL, VLAN, HSRP, TCP/IP, OSPF.</li>
+                    <li>Troubleshooting - Support, upgrading, and handling communication issues in various units.</li>
+                    <li>Testing new technologies in laboratory environments.</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="resume-section">
+            <h3 class="section-title">Education</h3>
+            
+            <div class="experience-item">
+                <h4 class="experience-title">MS-500</h4>
+                <p class="experience-company">John Bryce</p>
+                <p class="experience-date">2021</p>
+            </div>
+            
+            <div class="experience-item">
+                <h4 class="experience-title">CCNA</h4>
+                <p class="experience-company">John Bryce</p>
+                <p class="experience-date">2019</p>
+            </div>
+            
+            <div class="experience-item">
+                <h4 class="experience-title">Advanced Communications Systems Technician</h4>
+                <p class="experience-company">IDF (Bahad 7)</p>
+                <p class="experience-date">2018</p>
+            </div>
+            
+            <div class="experience-item">
+                <h4 class="experience-title">High School Diploma</h4>
+                <p class="experience-company">Urban H' Tel Aviv-Yafo</p>
+                <p class="experience-date">2012-2017</p>
+                <p>Full matriculation with a major in Computers, Electronics, and Electricity.</p>
+            </div>
+        </div>
+        
+        <div class="resume-section">
+            <h3 class="section-title">Languages</h3>
+            
+            <div class="skill-list">
+                <span class="skill-item">Hebrew</span>
+                <span class="skill-item">English</span>
+            </div>
+        </div>
     </div>
-    
-    <div class="resume-summary">
-      <p>Experienced IT professional with a 6-year focus on System and Network Administration. Recognized for a strong work ethic, quick learning, and creative thinking, contributing to successful IT project execution. Committed to precision and professionalism, with a track record of excellence in IT management.</p>
-    </div>
-    
-    <div class="resume-section">
-      <h3 class="section-title">Technology Expertise</h3>
-      <div class="skill-list">
-        <span class="skill-item">Windows Services</span>
-        <span class="skill-item">Network Infrastructure</span>
-        <span class="skill-item">Multi-cloud Environments</span>
-        <span class="skill-item">Virtualization</span>
-        <span class="skill-item">PowerShell</span>
-        <span class="skill-item">Office 365</span>
-        <span class="skill-item">Azure AD</span>
-        <span class="skill-item">FortiGate</span>
-        <span class="skill-item">Windows & Mac</span>
-      </div>
-      
-      <ul class="skill-detail-list">
-        <li>Advanced experience with Windows on-premise services (AD, GPO, DNS, DHCP, DC, CA).</li>
-        <li>Advanced experience in network infrastructure (Cisco, Juniper, Dell, and Unifi).</li>
-        <li>Competent experience in multi-cloud environments (AWS, Azure, GCP).</li>
-        <li>Advanced experience with virtualization, EDR, WAF/DNS, and backup systems: VMware, SentinelOne, Arcserve, Cloudflare.</li>
-        <li>Advanced PowerShell scripting and automation.</li>
-        <li>Expert in Office 365 administration.</li>
-        <li>Experience with Azure AD enterprise applications, conditional access, app registration, Endpoint Manager/Intune.</li>
-        <li>Intermediate experience with FortiGate for network policy and security management.</li>
-        <li>Advanced management of Windows and Mac environments.</li>
-      </ul>
-    </div>
-    
-    <div class="resume-section">
-      <h3 class="section-title">Experience</h3>
-      
-      <div class="experience-item">
-        <h4 class="experience-title">IT Project Manager</h4>
-        <p class="experience-company">Danel</p>
-        <p class="experience-date">2023-2024</p>
-        <p>Leading Active Directory migration for four different companies, including the transfer of AD computers and users and incorporating Azure user migration.</p>
-      </div>
-      
-      <div class="experience-item">
-        <h4 class="experience-title">System Administrator</h4>
-        <p class="experience-company">Quali</p>
-        <p class="experience-date">2020-2023</p>
-        <p>Provided support for 150 employees across multiple sites, both local and abroad. Responsible for maintenance, configuration, and reliable operation of computer systems, networks, servers, cloud, and virtualization.</p>
-      </div>
-    </div>
-    
-    <div class="resume-section">
-      <h3 class="section-title">Military Service</h3>
-      
-      <div class="experience-item">
-        <h4 class="experience-title">Network Administrator</h4>
-        <p class="experience-company">Intelligence - Israel Defense Forces</p>
-        <p>Specialized in deploying, maintaining, and upgrading intelligence systems, with a focus on managing Cisco equipment to ensure optimal performance in critical environments.</p>
-      </div>
-    </div>
-    
-    <div class="resume-section">
-      <h3 class="section-title">Education</h3>
-      
-      <div class="experience-item">
-        <h4 class="experience-title">Advanced Information Systems and Computer Technician Training</h4>
-        <p class="experience-company">Israel Defense Forces</p>
-        <p class="experience-date">2018</p>
-      </div>
-      
-      <div class="experience-item">
-        <h4 class="experience-title">High School Diploma</h4>
-        <p class="experience-company">Maale Adumim Yeshiva High School</p>
-        <p class="experience-date">2013-2017</p>
-      </div>
-    </div>
-  </div>
+</body>
+</html>
