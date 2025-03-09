@@ -6,7 +6,7 @@ pipeline {
     }
     
     environment {
-        REPO_URL = 'https://github.com/NehorayHillel/flask_resume.git'
+        REPO_URL = 'https://github.com/NetanelAviezer/web_resume_project.git'
         NETWORK_NAME = 'resume_network'
         PROJECT_DIR = "${WORKSPACE}/local-deployment"
     }

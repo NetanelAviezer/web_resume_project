@@ -15,7 +15,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'master', url: 'https://github.com/NehorayHillel/flask_resume.git'
+                git branch: 'master', url: 'https://github.com/NetanelAviezer/web_resume_project.git'
             }
         }
         
