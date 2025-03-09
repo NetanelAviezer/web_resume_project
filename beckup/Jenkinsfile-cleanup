@@ -1,0 +1,45 @@
+pipeline {
+    agent any
+    environment {
+        APP_IMAGE = 'resume_web_image'
+        DB_IMAGE = 'resume_db_image'
+        NETWORK_NAME = 'resume_network'
+        DB_CONTAINER = 'resume_db'
+        APP_CONTAINER = 'resume_web'
+    }
+    stages {
+        stage('Stop and Remove Containers') {
+            steps {
+                script {
+                    sh "docker stop ${APP_CONTAINER} || true"
+                    sh "docker rm ${APP_CONTAINER} || true"
+                    sh "docker stop ${DB_CONTAINER} || true"
+                    sh "docker rm ${DB_CONTAINER} || true"
+                }
+            }
+        }
+        stage('Remove Docker Network') {
+            steps {
+                script {
+                    sh "docker network rm ${NETWORK_NAME} || true"
+                }
+            }
+        }
+        stage('Remove Images') {
+            steps {
+                script {
+                    sh "docker rmi ${APP_IMAGE} || true"
+                    sh "docker rmi ${DB_IMAGE} || true"
+                }
+            }
+        }
+        stage('Prune Volumes') {
+            steps {
+                script {
+                    // This removes all dangling volumes. Adjust as needed.
+                    sh "docker volume prune -f || true"
+                }
+            }
+        }
+    }
+}

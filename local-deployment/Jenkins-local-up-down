@@ -1,0 +1,117 @@
+pipeline {
+    agent any
+    
+    parameters {
+        choice(name: 'action', choices: ['deploy', 'destroy'], description: 'Select action to perform')
+    }
+    
+    environment {
+        REPO_URL = 'https://github.com/NehorayHillel/flask_resume.git'
+        NETWORK_NAME = 'resume_network'
+        PROJECT_DIR = "${WORKSPACE}/local-deployment"
+    }
+    
+    stages {
+        stage('Checkout Repository') {
+            steps {
+                git url: "${REPO_URL}", branch: 'master'
+            }
+        }
+        
+        stage('Deploy Application') {
+            when {
+                expression { params.action == 'deploy' }
+            }
+            steps {
+                script {
+                    // Navigate to local-deployment folder
+                    dir("${PROJECT_DIR}") {
+                        // Create Docker network if it doesn't exist
+                        sh "docker network create ${NETWORK_NAME} || true"
+                        
+                        // Build and start the containers using docker-compose
+                        sh "docker-compose down -v || true" // Clean up any old containers first
+                        sh "docker-compose build"
+                        sh "docker-compose up -d"
+                        
+                        // Wait for the application to be ready
+                        sh '''
+                        echo "Waiting for application to be ready..."
+                        for i in $(seq 1 12); do
+                            if curl -s http://localhost:5000 > /dev/null; then
+                                echo "Application is up and running!"
+                                break
+                            fi
+                            echo "Application not ready yet. Retrying in 5 seconds..."
+                            sleep 5
+                            if [ $i -eq 12 ]; then
+                                echo "Application failed to start in time. Check logs for details."
+                                docker-compose logs
+                                exit 1
+                            fi
+                        done
+                        '''
+                    }
+                }
+            }
+            post {
+                success {
+                    echo """
+====================================================================================================
+APPLICATION DEPLOYED SUCCESSFULLY
+====================================================================================================
+Main Application URL: http://localhost:5000/
+Monitoring URL: http://localhost:5000/monitor
+====================================================================================================
+                    """
+                }
+            }
+        }
+        
+        stage('Destroy Application') {
+            when {
+                expression { params.action == 'destroy' }
+            }
+            steps {
+                script {
+                    dir("${PROJECT_DIR}") {
+                        // Stop and remove all containers defined in docker-compose
+                        sh "docker-compose down -v"
+                        
+                        // Remove Docker network
+                        sh "docker network rm ${NETWORK_NAME} || true"
+                        
+                        // Remove related Docker images
+                        sh "docker image prune -af --filter label=project=flask_resume || true"
+                        
+                        // Remove dangling volumes
+                        sh "docker volume prune -f || true"
+                    }
+                }
+            }
+            post {
+                success {
+                    echo "Successfully removed all containers, volumes, and images related to the application."
+                }
+            }
+        }
+    }
+    
+    post {
+        always {
+            // Cleanup workspace
+            cleanWs(cleanWhenNotBuilt: false,
+                    deleteDirs: true,
+                    disableDeferredWipeout: true,
+                    notFailBuild: true)
+        }
+        
+        success {
+            echo "Pipeline completed successfully"
+        }
+        
+        failure {
+            echo "Pipeline failed. Check the logs for details."
+        }
+    }
+}

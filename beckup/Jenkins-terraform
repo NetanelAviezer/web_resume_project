@@ -1,0 +1,71 @@
+pipeline {
+    agent any
+
+    parameters {
+        booleanParam(name: 'autoApprove', defaultValue: false, description: 'Automatically run apply after generating plan?')
+        choice(name: 'action', choices: ['apply', 'destroy'], description: 'Select the action to perform')
+    }
+
+    environment {
+        AWS_ACCESS_KEY_ID     = credentials('aws-access-key-id')
+        AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key')
+        AWS_DEFAULT_REGION    = 'us-east-1'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'master', url: 'https://github.com/NehorayHillel/flask_resume.git'
+            }
+        }
+        stage('Pre-cleanup') {
+            steps {
+                script {
+                    // Run the AWS CLI inside a container with the entrypoint overridden.
+                    docker.image('amazon/aws-cli').inside('--entrypoint=""') {
+                        sh 'aws ec2 delete-key-pair --key-name jenkins-key || true'
+                    }
+                }
+            }
+        }
+        stage('Terraform init') {
+            steps {
+                dir('terraform') {
+                    sh 'terraform init'
+                }
+            }
+        }
+        stage('Plan') {
+            steps {
+                withCredentials([string(credentialsId: 'jenkins-public-key', variable: 'PUBLIC_KEY')]) {
+                    dir('terraform') {
+                        sh 'terraform plan -var="jenkins_public_key=$PUBLIC_KEY" -out tfplan'
+                        sh 'terraform show -no-color tfplan > tfplan.txt'
+                    }
+                }
+            }
+        }
+        stage('Apply / Destroy') {
+            steps {
+                script {
+                    withCredentials([string(credentialsId: 'jenkins-public-key', variable: 'PUBLIC_KEY')]) {
+                        dir('terraform') {
+                            if (params.action == 'apply') {
+                                if (!params.autoApprove) {
+                                    def plan = readFile 'tfplan.txt'
+                                    input message: "Do you want to apply the plan?",
+                                          parameters: [text(name: 'Plan', description: 'Please review the plan', defaultValue: plan)]
+                                }
+                                sh 'terraform apply -var="jenkins_public_key=$PUBLIC_KEY" -input=false tfplan'
+                            } else if (params.action == 'destroy') {
+                                sh 'terraform destroy -var="jenkins_public_key=$PUBLIC_KEY" --auto-approve'
+                            } else {
+                                error "Invalid action selected. Please choose either 'apply' or 'destroy'."
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

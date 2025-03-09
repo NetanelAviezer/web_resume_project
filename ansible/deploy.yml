@@ -1,0 +1,231 @@
+---
+- name: Deploy Flask Resume Application
+  hosts: ec2
+  become: true
+  vars:
+    app_dir: /opt/flask_resume
+    repo_url: https://github.com/NehorayHillel/flask_resume.git
+    temp_dir: /tmp/flask_resume
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600  # Only update if cache is older than 1 hour
+
+    - name: Install required packages
+      apt:
+        name:
+          - git
+          - docker.io
+          - postgresql-client
+          - python3-pip
+        state: present
+        update_cache: no  # Already updated above
+
+    - name: Install Python PostgreSQL library
+      pip:
+        name: 
+          - psycopg2-binary
+          - sqlalchemy
+        state: present
+
+    - name: Start and enable Docker service
+      systemd:
+        name: docker
+        state: started
+        enabled: true
+
+    - name: Create project directory
+      file:
+        path: "{{ app_dir }}"
+        state: directory
+        mode: '0755'
+        owner: ubuntu
+        group: ubuntu
+
+    - name: Clone the repository
+      git:
+        repo: "{{ repo_url }}"
+        dest: "{{ temp_dir }}"
+        version: master  # Specify the branch/tag/commit
+        force: yes  # Ensure latest version
+
+    - name: Copy Web directory to project directory
+      copy:
+        src: "{{ temp_dir }}/Web/"
+        dest: "{{ app_dir }}/Web/"
+        remote_src: yes
+        owner: ubuntu
+        group: ubuntu
+        mode: preserve
+
+    - name: Copy DB directory to project directory
+      copy:
+        src: "{{ temp_dir }}/DB/"
+        dest: "{{ app_dir }}/DB/"
+        remote_src: yes
+        owner: ubuntu
+        group: ubuntu
+        mode: preserve
+
+    - name: Check if init.sql exists
+      stat:
+        path: "{{ app_dir }}/DB/init.sql"
+      register: init_sql_file
+
+    - name: Display init.sql status
+      debug:
+        msg: "init.sql file exists: {{ init_sql_file.stat.exists }}"
+
+    # Create a temporary .pgpass file for this connection only
+    - name: Create .pgpass file for secure connection (temporary)
+      copy:
+        dest: /home/ubuntu/.pgpass
+        content: "*:*:{{ rds_database }}:{{ rds_username }}:{{ rds_password }}"
+        mode: '0600'
+        owner: ubuntu
+        group: ubuntu
+      no_log: true  # Hide sensitive information in logs
+
+    - name: Import SQL file to RDS database
+      become_user: ubuntu
+      shell: >
+        PGPASSFILE=/home/ubuntu/.pgpass psql 
+        -h {{ rds_endpoint | regex_replace(':.*$', '') }} 
+        -U {{ rds_username }} 
+        -d {{ rds_database }} 
+        -p {{ rds_port }} 
+        --set=sslmode={{ rds_ssl_mode }} 
+        -f {{ app_dir }}/DB/init.sql
+      register: psql_import
+      failed_when: psql_import.rc != 0 and 'already exists' not in psql_import.stderr
+      environment:
+        PGCONNECT_TIMEOUT: "10"  # Add timeout to prevent hanging
+      no_log: true  # Prevent password leakage
+
+    - name: Remove .pgpass file immediately after use
+      file:
+        path: /home/ubuntu/.pgpass
+        state: absent
+      no_log: true
+
+    - name: Verify database tables exist (using temporary credentials)
+      become_user: ubuntu
+      block:
+        - name: Create temporary .pgpass for verification
+          copy:
+            dest: /home/ubuntu/.pgpass.verify
+            content: "*:*:{{ rds_database }}:{{ rds_username }}:{{ rds_password }}"
+            mode: '0600'
+            owner: ubuntu
+            group: ubuntu
+          no_log: true
+
+        - name: Check tables
+          shell: >
+            PGPASSFILE=/home/ubuntu/.pgpass.verify psql 
+            -h {{ rds_endpoint | regex_replace(':.*$', '') }} 
+            -U {{ rds_username }} 
+            -d {{ rds_database }} 
+            -p {{ rds_port }} 
+            --set=sslmode={{ rds_ssl_mode }} 
+            -c "\dt"
+          register: tables_check
+          no_log: true
+
+        - name: Remove temporary .pgpass.verify
+          file:
+            path: /home/ubuntu/.pgpass.verify
+            state: absent
+          no_log: true
+
+    - name: Display tables in database
+      debug:
+        var: tables_check.stdout_lines
+      when: tables_check.stdout_lines is defined
+
+    - name: Create Docker network
+      command: docker network create resume_network
+      ignore_errors: yes
+      register: network_result
+      changed_when: network_result.rc == 0
+      failed_when: network_result.rc != 0 and "already exists" not in network_result.stderr
+
+    - name: Build Docker image
+      command: docker build -t resume_web_image -f {{ app_dir }}/Web/Dockerfile-web {{ app_dir }}/Web/
+      
+    - name: Remove existing container if it exists
+      command: docker rm -f resume_web
+      ignore_errors: yes
+
+    # Create a Docker Compose file instead of using environment variables directly
+    - name: Create Docker Compose file with environment variables
+      copy:
+        dest: "{{ app_dir }}/docker-compose.yml"
+        content: |
+          version: '3'
+          services:
+            resume_web:
+              image: resume_web_image
+              container_name: resume_web
+              ports:
+                - "0.0.0.0:5000:5000"
+              environment:
+                - FLASK_ENV=development
+                - FLASK_APP=app.py
+                - DB_HOST={{ rds_endpoint | regex_replace(':.*$', '') }}
+                - DB_PORT={{ rds_port }}
+                - DB_USER={{ rds_username }}
+                - DB_PASSWORD={{ rds_password }}
+                - DB_NAME={{ rds_database }}
+                - DB_SSL_MODE={{ rds_ssl_mode }}
+              networks:
+                - resume_network
+              restart: unless-stopped
+          
+          networks:
+            resume_network:
+              external: true
+        mode: '0600'
+        owner: ubuntu
+        group: ubuntu
+      no_log: true  # Hide sensitive content in logs
+
+    - name: Install Docker Compose
+      apt:
+        name: docker-compose
+        state: present
+
+    - name: Run application using Docker Compose
+      become_user: ubuntu
+      command: docker-compose -f {{ app_dir }}/docker-compose.yml up -d
+      args:
+        chdir: "{{ app_dir }}"
+      register: docker_compose_result
+
+    - name: Wait for application to be ready
+      wait_for:
+        host: localhost
+        port: 5000
+        timeout: 60
+        delay: 10
+      register: app_ready
+      ignore_errors: yes
+
+    - name: Show running containers
+      command: docker ps
+      register: docker_ps
+
+    - name: Display application URL
+      debug:
+        msg: "Application is running at http://{{ inventory_hostname }}:5000"
+      when: app_ready is success
+
+    - name: Display troubleshooting steps if application isn't accessible
+      debug:
+        msg: |
+          Application may not be accessible. Check:
+          1. Container logs: docker logs resume_web
+          2. EC2 security group allows port 5000
+          3. Network connectivity to the RDS instance
+      when: app_ready is failed

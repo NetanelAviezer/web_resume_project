@@ -1,0 +1,101 @@
+pipeline {
+    agent any
+    environment {
+        APP_IMAGE = 'resume_web_image'
+        DB_IMAGE = 'resume_db_image'
+        NETWORK_NAME = 'resume_network'
+        DB_CONTAINER = 'resume_db'
+        APP_CONTAINER = 'resume_web'
+        DB_USER = 'user'
+        DB_PASSWORD = 'password'
+        DB_NAME = 'resume_db'
+    }
+    stages {
+        stage('Clone Repository') {
+            steps {
+                git 'https://github.com/NehorayHillel/flask_resume.git'
+            }
+        }
+        stage('Build Docker Images') {
+            steps {
+                script {
+                    docker.build("${DB_IMAGE}", "-f DB/Dockerfile-db DB")
+                    docker.build("${APP_IMAGE}", "-f Web/Dockerfile-web Web")
+                }
+            }
+        }
+        stage('Create Docker Network') {
+            steps {
+                script {
+                    sh "docker network create ${NETWORK_NAME} || true"
+                }
+            }
+        }
+        stage('Run PostgreSQL Container') {
+            steps {
+                script {
+                    sh """
+                    docker run -d --name ${DB_CONTAINER} \\
+                    --network ${NETWORK_NAME} \\
+                    -e POSTGRES_USER=${DB_USER} \\
+                    -e POSTGRES_PASSWORD=${DB_PASSWORD} \\
+                    -e POSTGRES_DB=${DB_NAME} \\
+                    -p 5432:5432 \\
+                    ${DB_IMAGE}
+                    """
+                }
+            }
+        }
+        stage('Wait for Database to be Ready') {
+            steps {
+                script {
+                    sh """
+                    echo "Waiting for database to start..."
+                    for i in \$(seq 1 30); do
+                        if docker exec ${DB_CONTAINER} pg_isready -U ${DB_USER}; then
+                            echo "Database is up!"
+                            exit 0
+                        fi
+                        echo "Database not ready yet. Retrying in 5 seconds..."
+                        sleep 5
+                    done
+                    echo "Database failed to start in time."
+                    exit 1
+                    """
+                }
+            }
+        }
+        stage('Run Flask Application Container') {
+            steps {
+                script {
+                    sh """
+                    docker run -d \\
+                    --name ${APP_CONTAINER} \\
+                    --env FLASK_ENV=development \\
+                    --env FLASK_APP=app.py \\
+                    --network ${NETWORK_NAME} \\
+                    -e DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@${DB_CONTAINER}:5432/${DB_NAME} \\
+                    -p 5000:5000 \\
+                    ${APP_IMAGE}
+                    """
+                }
+            }
+        }
+        stage('Verify Application') {
+            steps {
+                script {
+                    sh '''
+                    echo "Verifying Flask app via docker exec..."
+                    for i in $(seq 1 30); do
+                        docker exec ${APP_CONTAINER} sh -c "curl -f http://localhost:5000" && exit 0
+                        echo "Flask app not ready yet. Retrying in 5 seconds..."
+                        sleep 5
+                    done
+                    echo "Flask app failed to start in time."
+                    exit 1
+                    '''
+                }
+            }
+        }
+    }
+}

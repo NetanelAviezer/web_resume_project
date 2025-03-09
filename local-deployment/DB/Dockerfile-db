@@ -1,0 +1,7 @@
+FROM postgres:15
+
+# Copy initialization script
+COPY init.sql /docker-entrypoint-initdb.d/
+
+# Default PostgreSQL start command
+CMD ["bash", "-c", "docker-entrypoint.sh postgres & sleep 5 && psql -U user -d postgres -f /docker-entrypoint-initdb.d/init.sql && wait"]

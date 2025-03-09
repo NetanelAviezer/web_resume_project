@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: ./Web
+      dockerfile: Dockerfile-web
+    container_name: resume_web
+    ports:
+      - "5000:5000"
+    depends_on:
+      db:
+        condition: service_healthy  
+    restart: always  
+    environment:
+      - FLASK_ENV=development
+      - FLASK_APP=app.py
+      - DB_HOST=resume_db
+      - DB_PORT=5432
+      - DB_USER=user
+      - DB_PASSWORD=password
+      - DB_NAME=resume_db
+
+  db:
+    build:
+      context: ./DB
+      dockerfile: Dockerfile-db
+    container_name: resume_db
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: resume_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:  
+      test: ["CMD-SHELL", "pg_isready -U user"]
+      interval: 5s
+      retries: 5
+      timeout: 3s
+
+volumes:
+  postgres_data:

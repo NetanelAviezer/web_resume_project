@@ -1,0 +1,49 @@
+---
+- name: Deploy Application on EC2 Instance
+  hosts: ec2
+  become: yes
+  tasks:
+    - name: Ensure target directory /project exists on remote host
+      file:
+        path: /project
+        state: directory
+        owner: ubuntu
+        group: ubuntu
+        mode: '0755'
+
+    - name: Archive the Web folder on the control node
+      shell: tar czf web.tar.gz -C .. Web
+      delegate_to: localhost
+      args:
+        chdir: "{{ playbook_dir }}"
+
+    - name: Copy and extract the Web archive to /project on remote host
+      unarchive:
+        src: "{{ playbook_dir }}/web.tar.gz"
+        dest: /project/
+        remote_src: no
+
+    - name: Build Docker image for the project
+      shell: docker build -t resume_web_image -f Web/Dockerfile-web .
+      args:
+        chdir: /project
+
+    - name: Create Docker network if not exists
+      shell: |
+        if ! docker network inspect resume_network >/dev/null 2>&1; then
+          docker network create resume_network
+        fi
+      args:
+        executable: /bin/bash
+
+    - name: Run Docker container for the web app
+      shell: |
+        docker run -d \
+          --name resume_web \
+          -p 5000:5000 \
+          --env FLASK_ENV=development \
+          --env FLASK_APP=app.py \
+          --env SQLALCHEMY_DATABASE_URI="postgresql://neho:!Twork314Nh@db:5432/resume_db" \
+          -v "/project/Web:/app" \
+          --network resume_network \
+          resume_web_image

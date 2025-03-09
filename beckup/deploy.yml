@@ -1,0 +1,158 @@
+---
+- name: Deploy Flask Resume Application
+  hosts: ec2
+  become: true
+  vars:
+    rds_endpoint: my-free-tier-db.cyfoy4g0kv3l.us-east-1.rds.amazonaws.com
+    rds_username: neho
+    rds_password: "!Twork314Nh"
+    rds_database: resume_db
+    rds_port: 5432
+    rds_ssl_mode: require
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+    - name: Install required packages
+      apt:
+        name:
+          - git
+          - docker.io
+          - postgresql-client
+          - python3-pip
+        state: present
+
+    - name: Install Python PostgreSQL library
+      pip:
+        name: 
+          - psycopg2-binary
+          - sqlalchemy
+        state: present
+
+    - name: Start and enable Docker service
+      systemd:
+        name: docker
+        state: started
+        enabled: true
+
+    - name: Create project directory
+      file:
+        path: /opt/flask_resume
+        state: directory
+        mode: '0755'
+
+    - name: Clone the repository
+      git:
+        repo: https://github.com/NehorayHillel/flask_resume.git
+        dest: /tmp/flask_resume
+
+    - name: Copy Web directory to project directory
+      copy:
+        src: /tmp/flask_resume/Web/
+        dest: /opt/flask_resume/Web/
+        remote_src: yes
+
+    - name: Copy DB directory to project directory
+      copy:
+        src: /tmp/flask_resume/DB/
+        dest: /opt/flask_resume/DB/
+        remote_src: yes
+
+    - name: Check if init.sql exists
+      stat:
+        path: /opt/flask_resume/DB/init.sql
+      register: init_sql_file
+
+    - name: Display init.sql status
+      debug:
+        msg: "init.sql file exists: {{ init_sql_file.stat.exists }}"
+
+    - name: View content of init.sql file
+      command: cat /opt/flask_resume/DB/init.sql
+      register: init_sql_content
+      when: init_sql_file.stat.exists
+      
+    - name: Display content of init.sql
+      debug:
+        var: init_sql_content.stdout_lines
+      when: init_sql_file.stat.exists
+
+    - name: Import SQL file to RDS database
+      shell: PGPASSWORD="{{rds_password}}" psql -h {{rds_endpoint}} -U {{rds_username}} -d {{rds_database}} -p {{rds_port}} --set=sslmode={{rds_ssl_mode}} -f /opt/flask_resume/DB/init.sql
+      register: psql_import
+      failed_when: psql_import.rc != 0 and 'already exists' not in psql_import.stderr
+
+    - name: Display PostgreSQL import result (stdout)
+      debug:
+        var: psql_import.stdout_lines
+      when: psql_import.stdout_lines is defined
+    
+    - name: Display PostgreSQL import errors (stderr)
+      debug:
+        var: psql_import.stderr_lines
+      when: psql_import.stderr_lines is defined
+
+    - name: Verify database tables exist
+      shell: PGPASSWORD="{{ rds_password }}" psql -h {{ rds_endpoint }} -U {{ rds_username }} -d {{ rds_database }} -p {{ rds_port }} --set=sslmode={{ rds_ssl_mode }} -c "\dt"
+      register: tables_check
+
+    - name: Display tables in database
+      debug:
+        var: tables_check.stdout_lines
+      when: tables_check.stdout_lines is defined
+
+    - name: Create Docker network
+      command: docker network create resume_network
+      ignore_errors: yes
+      register: network_result
+      changed_when: network_result.rc == 0
+      failed_when: network_result.rc != 0 and "already exists" not in network_result.stderr
+
+    - name: Build Docker image
+      command: docker build -t resume_web_image -f /opt/flask_resume/Web/Dockerfile-web /opt/flask_resume/Web/
+      
+    - name: Remove existing container if it exists
+      command: docker rm -f resume_web
+      ignore_errors: yes
+
+    - name: Run Flask application container with PostgreSQL connection
+      command: >
+        docker run -d
+        --name resume_web
+        -p 0.0.0.0:5000:5000
+        --env FLASK_ENV=development
+        --env FLASK_APP=app.py
+        --env DB_HOST={{ rds_endpoint }}
+        --env DB_PORT={{ rds_port }}
+        --env DB_USER={{ rds_username }}
+        --env DB_PASSWORD={{ rds_password }}
+        --env DB_NAME={{ rds_database }}
+        --env DB_SSL_MODE={{ rds_ssl_mode }}
+        --network resume_network
+        resume_web_image
+
+    - name: Wait for application to be ready
+      wait_for:
+        host: localhost
+        port: 5000
+        timeout: 30
+      ignore_errors: yes
+
+    - name: Show running containers
+      command: docker ps
+      register: docker_ps
+
+    - name: Display running containers
+      debug:
+        var: docker_ps.stdout_lines
+
+    - name: Display container logs
+      command: docker logs resume_web
+      register: container_logs
+      ignore_errors: yes
+
+    - name: Show container logs
+      debug:
+        var: container_logs.stdout_lines
+      when: container_logs.stdout_lines is defined

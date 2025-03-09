@@ -1,0 +1,36 @@
+#### network
+
+#create network
+docker network create resume_network
+
+
+##### DB windows
+
+# docker build
+docker build -t resume_web_image -f Dockerfile .
+
+# docker run
+docker run -d --name resume_db `
+  -e POSTGRES_USER=user `
+  -e POSTGRES_PASSWORD=password `
+  -e POSTGRES_DB=resume_db `
+  -p 5432:5432 `
+  -v postgres_data:/var/lib/postgresql/data `
+  --network resume_network `
+  resume_db_image
+
+
+####### Web windows
+# docker build 
+docker build -t resume_web_image -f Dockerfile-web .
+
+# docker run
+docker run -d `
+  --name resume_web `
+  -p 5000:5000 `
+  --env FLASK_ENV=development `
+  --env FLASK_APP=app.py `
+  --env SQLALCHEMY_DATABASE_URI=postgresql://user:password@db:5432/resume_db `
+  -v "${PWD}:/app" `
+  --network resume_network `
+  resume_web_image

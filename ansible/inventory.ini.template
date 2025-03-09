@@ -1,0 +1,2 @@
+[ec2]
+${EC2_PUBLIC_IP} ansible_user=ubuntu ansible_ssh_private_key_file=jenkins_key.pem ansible_ssh_common_args='-o StrictHostKeyChecking=no'
