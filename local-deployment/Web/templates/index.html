@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Nehoray Hillel - Professional Resume</title>
+  <title>Professional Resume</title>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <style>
@@ -448,102 +448,46 @@
         padding: 20px;
       }
     }
+    
+    /* Loading indicator styles */
+    .loading-indicator {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 300px;
+    }
+    
+    .loading-spinner {
+      border: 4px solid rgba(0, 0, 0, 0.1);
+      border-radius: 50%;
+      border-top: 4px solid var(--primary);
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    /* Error message styles */
+    .error-message {
+      padding: 20px;
+      background-color: #fee2e2;
+      color: #b91c1c;
+      border-radius: 8px;
+      border-left: 4px solid #b91c1c;
+      margin: 20px 0;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <!-- Resume Section - Main Content -->
-    <div class="card resume-card">
-      <div class="resume-header">
-        <h1 class="resume-name">Nehoray Hillel</h1>
-        <h2 class="resume-title">IT Professional</h2>
-        
-        <div class="contact-info">
-          <div class="contact-item">
-            <span class="contact-label">Email:</span>
-            <a href="mailto:Nhoray5@gmail.com">Nhoray5@gmail.com</a>
-          </div>
-          <div class="contact-item">
-            <span class="contact-label">Phone:</span>
-            <span>+972524322618</span>
-          </div>
-        </div>
-      </div>
-      
-      <div class="resume-summary">
-        <p>Experienced IT professional with a 6-year focus on System and Network Administration. Recognized for a strong work ethic, quick learning, and creative thinking, contributing to successful IT project execution. Committed to precision and professionalism, with a track record of excellence in IT management.</p>
-      </div>
-      
-      <div>
-        <h3 class="section-title">Technology Expertise</h3>
-        
-        <div class="skill-badges">
-          <div class="skill-badge"><i class="fas fa-window-maximize"></i> Windows Services</div>
-          <div class="skill-badge"><i class="fas fa-network-wired"></i> Network Infrastructure</div>
-          <div class="skill-badge"><i class="fas fa-cloud"></i> Multi-cloud Environments</div>
-          <div class="skill-badge"><i class="fas fa-server"></i> Virtualization</div>
-          <div class="skill-badge"><i class="fas fa-terminal"></i> PowerShell</div>
-          <div class="skill-badge"><i class="fas fa-file-excel"></i> Office 365</div>
-          <div class="skill-badge"><i class="fas fa-user-shield"></i> Azure AD</div>
-          <div class="skill-badge"><i class="fas fa-shield-alt"></i> FortiGate</div>
-          <div class="skill-badge"><i class="fas fa-desktop"></i> Windows & Mac</div>
-        </div>
-        
-        <ul class="skill-list">
-          <li>Advanced experience with Windows on-premise services (AD, GPO, DNS, DHCP, DC, CA).</li>
-          <li>Advanced experience in network infrastructure (Cisco, Juniper, Dell, and Unifi).</li>
-          <li>Competent experience in multi-cloud environments (AWS, Azure, GCP).</li>
-          <li>Advanced experience with virtualization, EDR, WAF/DNS, and backup systems: VMware, SentinelOne, Arcserve, Cloudflare.</li>
-          <li>Advanced PowerShell scripting and automation.</li>
-          <li>Expert in Office 365 administration.</li>
-          <li>Experience with Azure AD enterprise applications, conditional access, app registration, Endpoint Manager/Intune.</li>
-          <li>Intermediate experience with FortiGate for network policy and security management.</li>
-          <li>Advanced management of Windows and Mac environments.</li>
-        </ul>
-      </div>
-      
-      <div class="experience-section">
-        <h3 class="section-title">Experience</h3>
-        
-        <div class="experience-item">
-          <h4 class="experience-title">IT Project Manager</h4>
-          <p class="experience-company">Danel</p>
-          <p class="experience-date"><i class="far fa-calendar-alt"></i> 2023-2024</p>
-          <p>Leading Active Directory migration for four different companies, including the transfer of AD computers and users and incorporating Azure user migration.</p>
-        </div>
-        
-        <div class="experience-item">
-          <h4 class="experience-title">System Administrator</h4>
-          <p class="experience-company">Quali</p>
-          <p class="experience-date"><i class="far fa-calendar-alt"></i> 2020-2023</p>
-          <p>Provided support for 150 employees across multiple sites, both local and abroad. Responsible for maintenance, configuration, and reliable operation of computer systems, networks, servers, cloud, and virtualization.</p>
-        </div>
-      </div>
-      
-      <div class="experience-section">
-        <h3 class="section-title">Military Service</h3>
-        
-        <div class="experience-item">
-          <h4 class="experience-title">Network Administrator</h4>
-          <p class="experience-company">Intelligence - Israel Defense Forces</p>
-          <p>Specialized in deploying, maintaining, and upgrading intelligence systems, with a focus on managing Cisco equipment to ensure optimal performance in critical environments.</p>
-        </div>
-      </div>
-      
-      <div class="experience-section">
-        <h3 class="section-title">Education</h3>
-        
-        <div class="experience-item">
-          <h4 class="experience-title">Advanced Information Systems and Computer Technician Training</h4>
-          <p class="experience-company">Israel Defense Forces</p>
-          <p class="experience-date"><i class="far fa-calendar-alt"></i> 2018</p>
-        </div>
-        
-        <div class="experience-item">
-          <h4 class="experience-title">High School Diploma</h4>
-          <p class="experience-company">Maale Adumim Yeshiva High School</p>
-          <p class="experience-date"><i class="far fa-calendar-alt"></i> 2013-2017</p>
-        </div>
+    <div class="card resume-card" id="resumeContainer">
+      <div id="resumeContent">
+        {% include 'resume.html' %}
       </div>
     </div>
 
